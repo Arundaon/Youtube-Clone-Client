@@ -1,15 +1,41 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, inject} from 'vue'
+import {useRouter} from 'vue-router'
+import { getAuthCookie } from '@/utils/Utils'
 
-const search = ref("")
+const user = inject('user');
+const router = useRouter();
+const search = ref("");
 const searchVideo = async ()=>{
-  console.log("executing")
   if(search.value !== ""){
-    console.log("searching..."+search.value)
+    router.push({name:'home', query : {search: search.value} })
   }
 }
-</script>
 
+const logout = ()=>{
+  const token = getAuthCookie();
+  if(token && user){
+    fetch("http://localhost:8080/api/auth/logout",{
+      method:"DELETE",
+      headers:{
+        'X-API-TOKEN':token
+      }
+    })
+      .then(async rawRes =>{
+        const res = await rawRes.json();
+        if(!rawRes.ok){
+          throw new Error(res.errors)
+        }
+        document.cookie = 'Authorization=; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/;';
+        user.value = null;
+      })
+      .catch(err=>{
+        console.log("can't remove cookie")
+      })
+  }
+}
+
+</script>
 <template>
   <div class="dummy">
   </div>
@@ -20,8 +46,14 @@ const searchVideo = async ()=>{
       <input id="submit" type="submit" value="Search">
     </form>
 
-    <RouterLink to="/login"><div class="login-button">Login</div></RouterLink>
-
+    <RouterLink v-if="(user == null)" to="/login"><button class="login">Login</button></RouterLink>
+    <div class="profile-logout" v-else>
+      <RouterLink to="/update-user">
+      <img  alt="profile" class="profile" :src="user.profile" v-if="user.profile != null">
+      <img  alt="profile" class="profile" src="../assets/default_profile.svg" v-else>
+      </RouterLink>
+      <button class="logout" @click="logout">Logout</button>
+    </div>
   </nav>
 </template>
 
@@ -29,7 +61,9 @@ const searchVideo = async ()=>{
 .dummy{
   height: 4.5rem;
 }
+
 nav {
+  z-index: 10;
   position: fixed;
   top : 0;
   background-color: #202020;
@@ -56,10 +90,27 @@ nav {
   //background-color: #151515;
   //color:inherit;
 }
-
-.login-button{
-  background-color: #007bff;
+.profile-logout{
+  width: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile{
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+button{
+  color: #EEEEEE;
   padding: 0.5rem;
   border-radius: 10%;
+}
+.login{
+  background-color: #007bff;
+}
+
+.logout{
+  background-color: #b30505;
 }
 </style>

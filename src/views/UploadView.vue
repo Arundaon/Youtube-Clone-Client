@@ -1,93 +1,89 @@
 <script setup>
-import { ref, watch, inject} from 'vue';
+import { ref } from 'vue';
+import {useRouter} from 'vue-router'
 import NavHomeOnly from '@/components/NavHomeOnly.vue'
-import {useRouter} from 'vue-router';
-import {setCurrentUser} from '@/utils/Utils'
-
+import { getAuthCookie } from '@/utils/Utils'
 const router = useRouter();
 
-const user = inject("user")
-const name = ref('');
-const username = ref('');
-const password = ref('');
+const video = ref(null);
+const title = ref('');
+const description = ref('');
+
 const errorMessage = ref('');
 const showErrorPopup = ref(false);
 const showSuccessPopup = ref(false);
 
-const handleLogin = () => {
-  const userData = {
-    username: username.value,
-    password: password.value,
-  };
 
-  fetch("http://localhost:8080/api/auth/login",{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body:JSON.stringify(userData)
+const handleSubmit = () => {
+  const formData = new FormData();
+  formData.append("video",video.value);
+  formData.append("title",title.value);
+  formData.append("description",description.value);
 
+  fetch("http://localhost:8080/api/videos",{
+    method:"POST",
+    headers:{
+      'X-API-TOKEN':getAuthCookie()
     },
-  ).then(async rawRes=>{
-    const res = await rawRes.json();
-    if(!rawRes.ok){
-      throw new Error(res.errors);
-    }
-    document.cookie="Authorization="+res.data.token+";expires="+res.data.expiredAt;
-
-    setCurrentUser(user);
-    showSuccessPopup.value=true;
+    body:formData
+  })
+    .then(async rawRes  => {
+      const res = await rawRes.json();
+      if(!rawRes.ok){
+        throw new Error(res.errors)
+      }
+      showSuccessPopup.value = true;
     })
-    .catch(err=> {
+    .catch(err=>{
       errorMessage.value = err;
       showErrorPopup.value = true;
-
-
     })
-
 
 };
 
-const redirectHome = ()=>{
-  setTimeout(()=>{
-    router.push("/");
-  },1000)
 
+const closeSuccessPopup = ()=>{
+  showSuccessPopup.value = false;
+  video.value = null;
+  title.value = "";
+  description.value = "";
 }
 
 const closeErrorPopup = ()=>{
   showErrorPopup.value = false;
-  username.value = '';
-  password.value = '';
 }
 
-watch(showSuccessPopup, redirectHome)
+const videoUpload = (event)=>{
+  video.value = event.target.files[0];
+}
 </script>
 
 <template>
   <NavHomeOnly/>
-  <div class="login-form">
+  <div class="upload-form">
 
     <form @submit.prevent="handleSubmit">
-      <h2>Login</h2>
+      <h2>Upload Video</h2>
       <br>
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" v-model="username" required />
+        <label for="video">Video File</label>
+        <input type="file" name="video" id="video" accept="video/*"  @change="videoUpload" required />
       </div>
       <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
+        <label for="title">Title</label>
+        <input type="text" id="title" v-model="title" required />
       </div>
-      <button @click="handleLogin" type="submit">Login</button>
-      <RouterLink to="/register">
-      <h4>Create an Account</h4>
-      </RouterLink>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input type="text" id="description" v-model="description" required />
+      </div>
+      <button type="submit">Upload</button>
     </form>
   </div>
 
   <div v-if="showSuccessPopup" class="popup">
-    <p>Login successful!</p>
+    <p>Video uploaded!</p>
+    <button @click="closeSuccessPopup">Close</button>
   </div>
 
   <div v-if="showErrorPopup" class="popup">
@@ -112,10 +108,7 @@ watch(showSuccessPopup, redirectHome)
 h2{
   align-self: center;
 }
-h4{
-  margin: 0.5rem;
-}
-.login-form {
+.upload-form {
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -3,7 +3,8 @@ import HomeView from '@/views/HomeView.vue'
 import LoginView from "@/views/LoginView.vue"
 import WatchView from "@/views/WatchView.vue"
 import RegisterView from "@/views/RegisterView.vue"
-
+import UploadView from "@/views/UploadView.vue"
+import UpdateUserView from "@/views/UpdateUserView.vue"
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -39,7 +40,12 @@ const router = createRouter({
     {
       path:'/upload',
       name:'upload',
-      component: HomeView
+      component: UploadView
+    },
+    {
+      path:'/update-user',
+      name:'updateUser',
+      component: UpdateUserView
     }
 
 

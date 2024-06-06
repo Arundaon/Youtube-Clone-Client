@@ -1,8 +1,17 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import{onBeforeMount, provide, ref} from 'vue'
+import { getAuthCookie,setCurrentUser } from '@/utils/Utils'
+const user = ref(null);
+provide('user', user);
 
+onBeforeMount(()=>{
+    const token = getAuthCookie();
 
-
+    if(token){
+      setCurrentUser(user);
+    }
+})
 </script>
 
 <template>

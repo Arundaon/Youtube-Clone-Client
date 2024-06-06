@@ -1,26 +1,57 @@
 <script setup>
 import { ref } from 'vue';
 import NavHomeOnly from '@/components/NavHomeOnly.vue'
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 const name = ref('');
 const username = ref('');
 const password = ref('');
+const errorMessage = ref('');
+const showErrorPopup = ref(false);
+const showSuccessPopup = ref(false);
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   const userData = {
     name: name.value,
     username: username.value,
     password: password.value,
   };
 
-  // Process the registration data (e.g., send to an API)
-  // TODO: Register using API
-  console.log('Registering user:', userData);
+  fetch("http://localhost:8080/api/users",{
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+    },
+      body:JSON.stringify(userData)
 
-  // Reset form fields
+    },
+  ).then(res=>{
+    if(!res.ok){
+      throw new Error(res.statusText);
+    }
+    else{
+      showSuccessPopup.value = true;
+    }
+
+  })
+    .catch(err=> {
+      errorMessage.value = err;
+      showErrorPopup.value = true;
+    })
+
   name.value = '';
   username.value = '';
   password.value = '';
 };
+
+const redirectLogin = ()=>{
+  router.push("/login");
+}
+
+const closeErrorPopup = ()=>{
+  showErrorPopup.value = false;
+}
 </script>
 
 <template>
@@ -44,12 +75,34 @@ const handleSubmit = () => {
       </div>
       <button type="submit">Register</button>
     </form>
+
+    <div v-if="showSuccessPopup" class="popup">
+      <p>Register successful!</p>
+      <br>
+      <button @click="redirectLogin">Go to Login</button>
+    </div>
+
+    <div v-if="showErrorPopup" class="popup">
+      <p>Register failed: {{ errorMessage }}</p>
+      <br>
+      <button @click="closeErrorPopup">Close</button>
+    </div>
   </div>
 </template>
 
 
 
 <style scoped>
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background: #303030;
+  border-radius: 1rem;
+}
+
 h2{
   align-self: center;
 }

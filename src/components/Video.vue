@@ -1,42 +1,39 @@
 <script setup>
-import { defineProps } from 'vue'
-import {ref,  computed } from 'vue';
-import { useRoute } from 'vue-router';
-
-
-const props = defineProps([])
-const route = useRoute();
-const videoId = computed(() => route.query.v);
+import {ref} from 'vue';
+import {timeAgo} from '@/utils/Utils'
 const isLiked = ref(false);
+const likeCount = ref(0)
+
+defineProps({video:Object});
 
 const likeUnlike= ()=>{
 
   isLiked.value=!isLiked.value
-  console.log("cliked")
+  likeCount.value = likeCount.value + 1
 }
 </script>
 
 <template>
-  <div id="video-component">
-
-    <video id="video" controls>
-      <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
+  <div  id="video-component">
+    <video  id="video" controls>
+      <source :src="`http://localhost:8080/contents/${video.video}`" type="video/mp4">
       Your browser does not support the video tag.
     </video>
     <div class="video-info">
       <div class="video-title">
-        Title
+        {{ video.title }}
       </div>
       <div class="top-info">
         <div class="channel-info">
-          <img class="channel-profile" src="https://picsum.photos/100/100" alt="channel profile" >
+          <img v-if="video.uploader.profile != null" class="channel-profile" :src="`http://localhost:8080/contents/${video.uploader.profile}`" alt="channel profile" >
+          <img v-else src="../assets/default_profile.svg" alt="profile" class="channel-profile" >
           <div class="channel-name">
-            The Best Channel
+            {{video.uploader.name}}
           </div>
         </div>
         <div class="like" :class="{liked:isLiked}" @click="likeUnlike">
           <img class="like-image" src="@/assets/like.svg">
-          <div class="like-count">10</div>
+          <div class="like-count">{{ likeCount }}</div>
         </div>
       </div>
       <div class="bottom-info">
@@ -45,11 +42,11 @@ const likeUnlike= ()=>{
             5 views
         </span>
           <span class="upload">
-            4 Months Ago
+            {{ timeAgo(video.createdAt) }}
         </span>
         </div>
         <div class="description">
-          lorem ipsum dolor sil amet
+          {{ video.description }}
         </div>
       </div>
     </div>
@@ -57,14 +54,12 @@ const likeUnlike= ()=>{
 </template>
 
 <style scoped>
+
 #video-component{
-  display: flex;
-  flex-direction: column;
-  height: 110vh;
-  padding: 1.5rem;
-  width:892px;
+  padding: 1rem 1.5rem;
 }
 #video{
+  width: 100%;
   height: 502px;
   border-radius: 2%;
 }
@@ -98,8 +93,8 @@ const likeUnlike= ()=>{
   padding: 0.7rem 0.7rem;
   display: flex;
   flex-direction: column;
-  min-height: 6rem;
-  border-radius: 3%;
+  min-height: 4rem;
+  border-radius: 1rem;
 }
 .views{
   margin-right: 1rem;
@@ -125,7 +120,6 @@ const likeUnlike= ()=>{
   align-items: center;
   width: 5rem;
   justify-content: space-evenly;
-  //margin-right: 1rem;
   background-color: #222222;
   border-radius: 10%;
   cursor: pointer;

@@ -1,26 +1,31 @@
 <script setup>
-const props = defineProps({ id:String, thumbnail:String,title:String,profile:String,channel:String,views:Number,upload:Number });
+
+import { timeAgo }  from '@/utils/Utils'
+
+defineProps({video:Object});
+
 </script>
 
 <template>
-  <RouterLink :to="{name:'watch', query : {v: id} }">
+  <RouterLink :to="{name:'watch', query : {v: video.id} }">
   <div class="video-card">
-    <img alt="Video Thumbnail" class="thumbnail" :src="thumbnail">
+    <img alt="Video Thumbnail" class="thumbnail" :src="`http://localhost:8080/contents/${video.thumbnail}`">
     <div class="video-card-wrapper">
-      <img  alt="profile" class="video-profile" :src="profile">
+      <img  alt="profile" class="video-profile" :src="video.uploader.profile" v-if="video.uploader.profile != null">
+      <img  alt="profile" class="video-profile" src="../assets/default_profile.svg" v-else>
       <div class="video-info">
         <div class="video-title">
-          {{ title }}
+          {{ video.title }}
         </div>
         <div class="video-channel">
-          {{ channel }}
+          {{ video.uploader.name }}
         </div>
         <div class="video-detail">
           <div class="video-views">
-            {{ views}} views
+            50 views
           </div>
           <div class="video-upload-time">
-            {{ upload }} hours ago
+            {{ timeAgo(video.createdAt) }}
           </div>
         </div>
       </div>
