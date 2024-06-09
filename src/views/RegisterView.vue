@@ -10,8 +10,9 @@ const password = ref('');
 const errorMessage = ref('');
 const showErrorPopup = ref(false);
 const showSuccessPopup = ref(false);
-
+const loading = ref(false);
 const handleSubmit = async () => {
+  loading.value = true;
   const userData = {
     name: name.value,
     username: username.value,
@@ -26,9 +27,10 @@ const handleSubmit = async () => {
       body:JSON.stringify(userData)
 
     },
-  ).then(res=>{
-    if(!res.ok){
-      throw new Error(res.statusText);
+  ).then(async rawRes=>{
+    const res = await rawRes.json();
+    if(!rawRes.ok){
+      throw new Error(res.errors);
     }
     else{
       showSuccessPopup.value = true;
@@ -38,6 +40,9 @@ const handleSubmit = async () => {
     .catch(err=> {
       errorMessage.value = err;
       showErrorPopup.value = true;
+    })
+    .finally(()=>{
+      loading.value = false;
     })
 
   name.value = '';
@@ -74,6 +79,9 @@ const closeErrorPopup = ()=>{
         <input type="password" id="password" v-model="password" required />
       </div>
       <button type="submit">Register</button>
+      <div v-if="loading">
+        registering...
+      </div>
     </form>
 
     <div v-if="showSuccessPopup" class="popup">

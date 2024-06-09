@@ -50,6 +50,7 @@ const updateCommentList = () =>{
         throw new Error(res.errors);
       }
       comments.value = res.data.comments
+      console.log(res.data)
     })
     .catch(err=>{
       console.error("Error fetching video info:", err);
@@ -84,9 +85,6 @@ const updateCommentList = () =>{
 <style scoped>
 button{
   align-self: flex-end;
-  color: #EEEEEE;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
   background-color: #007bff;
 }
 

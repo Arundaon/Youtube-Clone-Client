@@ -1,26 +1,62 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, watch, onBeforeMount } from 'vue';
 import {useRouter} from 'vue-router'
 import NavHomeOnly from '@/components/NavHomeOnly.vue'
 import { getAuthCookie } from '@/utils/Utils'
 const router = useRouter();
 
-const video = ref(null);
-const title = ref('');
-const description = ref('');
+const profile = ref(null);
+const user = inject('user')
+const name = ref("");
+const bio = ref("");
+const password = ref('');
+const repeatPassword = ref('');
+
+watch(user,()=>{
+  name.value=user.value.name;
+  if(user.value.bio !=null){
+    bio.value = user.value.bio;
+  }
+})
 
 const errorMessage = ref('');
 const showErrorPopup = ref(false);
 const showSuccessPopup = ref(false);
+const loading = ref(false);
 
 
 const handleSubmit = () => {
+  if(name.value < 3 ){
+    errorMessage.value = "Name must be at least 3 characters in length";
+    showErrorPopup.value = true;
+    return;
+  }
+  if(password.value !== repeatPassword.value){
+    errorMessage.value = "Password repeated must have the same value";
+    showErrorPopup.value = true;
+    return;
+  }
   const formData = new FormData();
-  formData.append("video",video.value);
-  formData.append("title",title.value);
-  formData.append("description",description.value);
+  if(profile.value != null){
+    formData.append("profile",profile.value);
+  }
 
-  fetch("http://localhost:8080/api/videos",{
+  formData.append("name",name.value);
+
+  if(bio.value !== null){
+    formData.append("bio",bio.value);
+  }
+  if(password.value !== ""){
+    if(password.value < 8 ){
+      errorMessage.value = "Password must be at least 8 characters in length";
+      showErrorPopup.value = true;
+      return;
+    }
+    formData.append("password",password.value);
+  }
+
+  loading.value = true;
+  fetch("http://localhost:8080/api/users/current",{
     method:"POST",
     headers:{
       'X-API-TOKEN':getAuthCookie()
@@ -38,24 +74,26 @@ const handleSubmit = () => {
       errorMessage.value = err;
       showErrorPopup.value = true;
     })
+    .finally(()=>{
+      loading.value = false;
+    })
 
 };
 
 
 const closeSuccessPopup = ()=>{
   showSuccessPopup.value = false;
-  video.value = null;
-  title.value = "";
-  description.value = "";
+  profile.value = null;
 }
 
 const closeErrorPopup = ()=>{
   showErrorPopup.value = false;
 }
 
-const videoUpload = (event)=>{
-  video.value = event.target.files[0];
+const profileUpload = (event)=>{
+  profile.value = event.target.files[0];
 }
+
 </script>
 
 <template>
@@ -63,26 +101,37 @@ const videoUpload = (event)=>{
   <div class="upload-form">
 
     <form @submit.prevent="handleSubmit">
-      <h2>Upload Video</h2>
+      <h2>Update User Information</h2>
       <br>
       <div class="form-group">
-        <label for="video">Video File</label>
-        <input type="file" name="video" id="video" accept="video/*"  @change="videoUpload" required />
+        <label for="profile">Profile Image</label>
+        <input type="file" name="profile" id="profile" accept="image/*"  @change="profileUpload">
       </div>
       <div class="form-group">
-        <label for="title">Title</label>
-        <input type="text" id="title" v-model="title" required />
+        <label for="name">Name</label>
+        <input type="text" id="name" v-model="name"  required />
       </div>
       <div class="form-group">
-        <label for="description">Description</label>
-        <input type="text" id="description" v-model="description" required />
+        <label for="bio">Bio</label>
+        <input type="text" id="bio" v-model="bio" >
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" v-model="password" >
+      </div>
+      <div class="form-group">
+        <label for="repeat-password">Repeat Password</label>
+        <input type="password" id="repeat-password" v-model="repeatPassword" >
       </div>
       <button type="submit">Upload</button>
+      <div v-if="loading">
+        updating...
+      </div>
     </form>
   </div>
 
   <div v-if="showSuccessPopup" class="popup">
-    <p>Video uploaded!</p>
+    <p>User updated!</p>
     <button @click="closeSuccessPopup">Close</button>
   </div>
 

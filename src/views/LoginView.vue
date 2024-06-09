@@ -13,13 +13,14 @@ const password = ref('');
 const errorMessage = ref('');
 const showErrorPopup = ref(false);
 const showSuccessPopup = ref(false);
+const loading = ref(false);
 
 const handleLogin = () => {
   const userData = {
     username: username.value,
     password: password.value,
   };
-
+  loading.value = true;
   fetch("http://localhost:8080/api/auth/login",{
       method: 'POST',
       headers: {
@@ -41,8 +42,10 @@ const handleLogin = () => {
     .catch(err=> {
       errorMessage.value = err;
       showErrorPopup.value = true;
+    })
 
-
+    .finally(()=>{
+      loading.value = false;
     })
 
 
@@ -80,6 +83,9 @@ watch(showSuccessPopup, redirectHome)
         <input type="password" id="password" v-model="password" required />
       </div>
       <button @click="handleLogin" type="submit">Login</button>
+      <div v-if="loading">
+        logging in...
+      </div>
       <RouterLink to="/register">
       <h4>Create an Account</h4>
       </RouterLink>

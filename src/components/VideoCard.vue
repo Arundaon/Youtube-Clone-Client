@@ -7,11 +7,13 @@ defineProps({video:Object});
 </script>
 
 <template>
-  <RouterLink :to="{name:'watch', query : {v: video.id} }">
+
   <div class="video-card">
+    <RouterLink :to="{name:'watch', query : {v: video.id} }">
     <img alt="Video Thumbnail" class="thumbnail" :src="`http://localhost:8080/contents/${video.thumbnail}`">
+    </RouterLink>
     <div class="video-card-wrapper">
-      <img  alt="profile" class="video-profile" :src="video.uploader.profile" v-if="video.uploader.profile != null">
+      <img  alt="profile" class="video-profile" :src="`http://localhost:8080/contents/${video.uploader.profile}`" v-if="video.uploader.profile != null">
       <img  alt="profile" class="video-profile" src="../assets/default_profile.svg" v-else>
       <div class="video-info">
         <div class="video-title">
@@ -22,7 +24,7 @@ defineProps({video:Object});
         </div>
         <div class="video-detail">
           <div class="video-views">
-            50 views
+            {{ video.views }} views
           </div>
           <div class="video-upload-time">
             {{ timeAgo(video.createdAt) }}
@@ -31,7 +33,7 @@ defineProps({video:Object});
       </div>
     </div>
   </div>
-  </RouterLink>
+
 </template>
 
 <style scoped>

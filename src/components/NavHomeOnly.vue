@@ -4,7 +4,7 @@
 
 <template>
   <nav>
-    <RouterLink to="/"><h1>YTClone</h1></RouterLink>
+    <a href="/"><h1>YTClone</h1></a>
   </nav>
 </template>
 

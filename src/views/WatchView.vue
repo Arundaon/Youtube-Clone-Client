@@ -13,6 +13,22 @@ const video = ref({});
 
 
 const getVideoInfo = ()=>{
+  fetch("http://localhost:8080/api/videos/"+videoId.value+"/views", {
+    method:"PATCH",
+    headers:{
+      'Accept': 'application/json',
+    }
+  })
+    .then(async rawRes =>{
+      const res = await rawRes.json();
+      if(!rawRes.ok){
+        throw new Error(res.errors);
+      }
+
+    })
+    .catch(err=>{
+      console.error("Error fetching video info:", err);
+    })
 
   fetch("http://localhost:8080/api/videos/"+videoId.value, {
     method:"GET",
@@ -26,6 +42,7 @@ const getVideoInfo = ()=>{
         throw new Error(res.errors);
       }
       video.value = res.data;
+      console.log(res.data)
     })
     .catch(err=>{
       console.error("Error fetching video info:", err);

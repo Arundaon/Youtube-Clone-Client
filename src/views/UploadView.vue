@@ -12,6 +12,7 @@ const description = ref('');
 const errorMessage = ref('');
 const showErrorPopup = ref(false);
 const showSuccessPopup = ref(false);
+const loading = ref(false);
 
 
 const handleSubmit = () => {
@@ -19,7 +20,7 @@ const handleSubmit = () => {
   formData.append("video",video.value);
   formData.append("title",title.value);
   formData.append("description",description.value);
-
+  loading.value = true;
   fetch("http://localhost:8080/api/videos",{
     method:"POST",
     headers:{
@@ -37,6 +38,9 @@ const handleSubmit = () => {
     .catch(err=>{
       errorMessage.value = err;
       showErrorPopup.value = true;
+    })
+    .finally(()=>{
+      loading.value = false;
     })
 
 };
@@ -78,6 +82,9 @@ const videoUpload = (event)=>{
         <input type="text" id="description" v-model="description" required />
       </div>
       <button type="submit">Upload</button>
+      <div v-if="loading">
+        uploading...
+      </div>
     </form>
   </div>
 

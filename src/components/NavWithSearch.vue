@@ -48,10 +48,11 @@ const logout = ()=>{
 
     <RouterLink v-if="(user == null)" to="/login"><button class="login">Login</button></RouterLink>
     <div class="profile-logout" v-else>
-      <RouterLink to="/update-user">
-      <img  alt="profile" class="profile" :src="user.profile" v-if="user.profile != null">
+      <RouterLink to="/upload"><a class="upload"><img src="@/assets/upload.png" alt="upload" ></a></RouterLink>
+      <a href="/update-user">
+      <img  alt="profile" class="profile" :src="`http://localhost:8080/contents/${user.profile}`" v-if="user.profile != null">
       <img  alt="profile" class="profile" src="../assets/default_profile.svg" v-else>
-      </RouterLink>
+      </a>
       <button class="logout" @click="logout">Logout</button>
     </div>
   </nav>
@@ -87,11 +88,9 @@ nav {
 }
 #submit{
   width:5rem;
-  //background-color: #151515;
-  //color:inherit;
 }
 .profile-logout{
-  width: 10rem;
+  width: 12rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,11 +100,18 @@ nav {
   height: 2.5rem;
   border-radius: 50%;
 }
-button{
-  color: #EEEEEE;
-  padding: 0.5rem;
-  border-radius: 10%;
+
+.upload img{
+  width: 3rem;
+  filter: invert();
 }
+
+button{
+  font-weight: bold;
+  font-size: 14px;
+  height: 100%;
+}
+
 .login{
   background-color: #007bff;
 }

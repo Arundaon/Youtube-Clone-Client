@@ -35,4 +35,19 @@ a{
   color:#EEEEEE;
 }
 
+button{
+  color: #EEEEEE;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+div:hover{
+  cursor: default;
+}
+
+button:hover{
+  cursor: pointer;
+}
+
 </style>

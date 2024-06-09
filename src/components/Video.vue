@@ -1,16 +1,69 @@
 <script setup>
-import {ref} from 'vue';
-import {timeAgo} from '@/utils/Utils'
+import {ref, onBeforeMount, inject, watch} from 'vue';
+import {timeAgo, getAuthCookie} from '@/utils/Utils'
+
+const props = defineProps({video:Object});
+
 const isLiked = ref(false);
 const likeCount = ref(0)
-
-defineProps({video:Object});
+const user = inject("user")
 
 const likeUnlike= ()=>{
-
-  isLiked.value=!isLiked.value
-  likeCount.value = likeCount.value + 1
+  fetch("http://localhost:8080/api/videos/"+props.video.id+"/like",{
+    method:"POST",
+    headers: {
+      'X-API-TOKEN':getAuthCookie(),
+      'Content-Type':"application/json"
+    },
+    body:JSON.stringify({like:!isLiked.value})
+  })
+    .then(async rawRes =>{
+      console.log("liked!")
+      const res = await rawRes.json();
+      if(!rawRes.ok){
+        throw new Error(res.errors)
+      }
+      console.log(res.data)
+      getLikeLoggedIn();
+    })
+    .catch(err=>{
+      console.log(err)
+    })
 }
+
+const getLikeInfo = () => {
+  if(user.value == null){
+
+    likeCount.value=props.video.likes;
+  }
+  else{
+    getLikeLoggedIn();
+  }
+}
+
+const getLikeLoggedIn = ()=>{
+  console.log("new like info")
+  fetch("http://localhost:8080/api/videos/"+props.video.id+"/like",{
+    method:"GET",
+    headers: {
+      'X-API-TOKEN':getAuthCookie()
+    },
+  })
+    .then(async rawRes =>{
+      const res = await rawRes.json();
+      if(!rawRes.ok){
+        throw new Error(res.errors)
+      }
+      isLiked.value = res.data.liked;
+      likeCount.value = res.data.likes;
+      console.log(res.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+}
+
+onBeforeMount(getLikeInfo)
 </script>
 
 <template>
@@ -39,7 +92,7 @@ const likeUnlike= ()=>{
       <div class="bottom-info">
         <div class="views-upload">
         <span class="views">
-            5 views
+            {{ video.views }} views
         </span>
           <span class="upload">
             {{ timeAgo(video.createdAt) }}
@@ -73,7 +126,8 @@ const likeUnlike= ()=>{
 .top-info{
   display: flex;
   justify-content: space-between;
-  margin: 0.7rem 0rem;
+  margin: 1.5rem 0rem;
+
 }
 
 .channel-profile{
